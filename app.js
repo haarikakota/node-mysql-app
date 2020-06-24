@@ -1,6 +1,11 @@
 const express = require('express');
 const mysql = require('mysql');
 
+//Rendering HTML File 
+const http = require('http');
+const fs = require('fs');
+
+
 //Create connection
 const db = mysql.createConnection({
     host: 'localhost',
@@ -20,8 +25,29 @@ db.connect((err) => {
 
 const app = express();
 
-//Create db
-app.get('/createdb', (req, res) => {
+
+app.get('/', (req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    fs.readFile('./views/index.html', null, (err, result) => {
+        if (err) {
+            res.writeHead(404);
+            res.write('File not found!');
+        }
+        else {
+            res.write(result);
+        }
+
+        res.end();
+    });
+});
+
+
+app.post('/submit', (req, res) => {
+    res.send({ params: req.params, queryParams: req.query });
+});
+
+
+app.post('/nodemysqldb', (req, res) => {
     let sql = 'CREATE DATABASE IF NOT EXISTS nodemysql';
 
     db.query(sql, (err, result) => {
@@ -33,8 +59,8 @@ app.get('/createdb', (req, res) => {
     });
 });
 
-//Create table
-app.get('/createpoststable', (req, res) => {
+
+app.post('/poststable', (req, res) => {
     let sql = 'CREATE TABLE IF NOT EXISTS posts(id int AUTO_INCREMENT, title VARCHAR(255),body VARCHAR(255), PRIMARY KEY (id))';
     db.query(sql, (err, result) => {
         if (err) throw err;
@@ -44,8 +70,7 @@ app.get('/createpoststable', (req, res) => {
 });
 
 
-//Insert post two
-app.get('/addpost/:id', (req, res) => {
+app.post('/posts/:id', (req, res) => {
     let posts = { title: `post ${req.params.id}`, body: `This is post number ${req.params.id}` };
     let sql = 'INSERT INTO posts SET ?';
     let query = db.query(sql, posts, (err, result) => {
@@ -56,44 +81,43 @@ app.get('/addpost/:id', (req, res) => {
 });
 
 
-//select posts
-app.get('/getposts', (req, res) => {
+app.get('/posts', (req, res) => {
     let sql = 'SELECT * FROM posts';
     let query = db.query(sql, (err, results) => {
         if (err) throw err;
         console.log(results);
-        res.send('post fetched...');
+        res.send(results);
     });
 });
 
-//select single post
-app.get('/getpost/:id', (req, res) => {
+
+app.get('/posts/:id', (req, res) => {
     let sql = `SELECT * FROM posts WHERE id = ${req.params.id}`;
     let query = db.query(sql, (err, result) => {
         if (err) throw err;
         console.log(result);
-        res.send('post fetched...');
+        res.send(result);
     });
 });
 
-//Update post
-app.get('/updatepost/:id', (req, res) => {
+
+app.put('/posts/:id', (req, res) => {
     let newTitle = 'Updated Title';
     let sql = `UPDATE posts SET title = '${newTitle}' WHERE id = ${req.params.id}`;
     let query = db.query(sql, (err, result) => {
         if (err) throw err;
         console.log(result);
-        res.send('post updated...');
+        res.send(result);
     });
 });
 
-//Delete post
-app.get('/deletepost/:id', (req, res) => {
+
+app.delete('/posts/:id', (req, res) => {
     let sql = `DELETE FROM posts WHERE id = ${req.params.id}`;
     let query = db.query(sql, (err, result) => {
         if (err) throw err;
         console.log(result);
-        res.send('post deleted...');
+        res.send(result);
     });
 });
 
