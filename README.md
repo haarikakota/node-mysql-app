@@ -1,8 +1,8 @@
-# Node.js with MySQL
+![MySql with NODE](./banner.png)
 
-### How to start this application?
 
-```
+### Steps to run
+
+```bash
 npm run start
 ```
-
